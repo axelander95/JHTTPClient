@@ -58,6 +58,7 @@ public class JHttpRequest {
         return builder.toString();
     }
     
+    
     public String sendRawRequest(String method, ArrayList<JHttpParameter> headers, String raw) throws MalformedURLException, ProtocolException, IOException, JURLNotFoundException, JURLPermissionException, JURLErrorException
     {
         url = new URL(URLRequest);
@@ -66,14 +67,14 @@ public class JHttpRequest {
             httpsCon = (HttpsURLConnection) url.openConnection();
             httpsCon.setRequestMethod(method);
             con = httpsCon;
-            log.log(Level.INFO, "The connection has been determined as HTTP");
+            log.log(Level.INFO, "The connection has been determined as HTTPS");
         }
         else 
         {
             httpCon = (HttpURLConnection) url.openConnection();
             httpCon.setRequestMethod(method);
             con = httpCon;
-            log.log(Level.INFO, "The connection has been determined as HTTPS");
+            log.log(Level.INFO, "The connection has been determined as HTTP");
         }
         setHeaders(headers);
         log.log(Level.INFO, "The headers have been set");
@@ -86,6 +87,7 @@ public class JHttpRequest {
             }
             log.log(Level.INFO, "The params have been written");
         }
+        con.setDoInput(true);
         int responseCode = (isHTTPS())?httpsCon.getResponseCode():httpCon.getResponseCode();
         switch (responseCode)
         {
@@ -116,9 +118,8 @@ public class JHttpRequest {
     {
         if (con != null)
         {
-            headers.forEach((header) -> {
+            for(JHttpParameter header:headers)
                 con.addRequestProperty(header.getKey(), header.getValue());
-            });
         }
     }
     
@@ -127,9 +128,8 @@ public class JHttpRequest {
         if (parameters != null && parameters.size() > 0)
         {
             StringBuilder builder = new StringBuilder();
-            parameters.forEach((parameter) -> {
+            for(JHttpParameter parameter:parameters)
                 builder.append((builder.toString().length() == 0)?"?":"&").append(parameter.getKey()).append("=").append(parameter.getValue());
-            });
             return builder.toString();
         }
         return null;
